@@ -208,6 +208,7 @@ export default function CandidateForm() {
             reset({
               fullName: c.fullName,
               phone: c.phone,
+              email: c.email || '',
               currentCompany: c.currentCompany || '',
               currentDesignation: c.currentDesignation || '',
               location: c.location?._id || '',
@@ -291,6 +292,13 @@ export default function CandidateForm() {
             <label className={labelCls}>Phone *</label>
             <input {...register('phone', { required: 'Required' })} className={inputCls} />
             {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={labelCls}>Email</label>
+            <input type="email" {...register('email')} className={inputCls} placeholder="Optional" />
           </div>
         </div>
 
