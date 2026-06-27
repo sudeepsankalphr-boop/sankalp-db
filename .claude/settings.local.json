@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx playwright *)",
+      "Read(//usr/bin/**)",
+      "Bash(pdftoppm -v)",
+      "Bash(node -e ' *)",
+      "Bash(node *)",
+      "Bash(pdftoppm --help)"
+    ]
+  }
+}
