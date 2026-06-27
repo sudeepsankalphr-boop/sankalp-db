@@ -28,7 +28,7 @@ router.post('/login', async (req, res) => {
 
     const token = signToken(user._id);
     res.cookie('token', token, cookieOptions);
-    res.json({ user });
+    res.json({ token, user });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
