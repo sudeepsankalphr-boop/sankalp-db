@@ -130,14 +130,15 @@ export default function LocalDatabasePage() {
         <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
           <colgroup>
             <col style={{ width: 40 }} />
-            <col style={{ width: 155 }} />
-            <col style={{ width: 115 }} />
-            <col style={{ width: 140 }} />
+            <col style={{ width: 145 }} />
+            <col style={{ width: 110 }} />
+            <col style={{ width: 150 }} />
             <col style={{ width: 130 }} />
-            <col style={{ width: 50 }} />
+            <col style={{ width: 120 }} />
+            <col style={{ width: 48 }} />
             <col style={{ width: 55 }} />
             <col style={{ width: 110 }} />
-            <col style={{ width: 140 }} />
+            <col style={{ width: 130 }} />
             <col style={{ width: 110 }} />
           </colgroup>
           <thead>
@@ -145,6 +146,7 @@ export default function LocalDatabasePage() {
               <th style={TH}>#</th>
               <th style={TH}>Name</th>
               <th style={TH}>Phone</th>
+              <th style={TH}>Email</th>
               <th style={TH}>Company</th>
               <th style={TH}>Designation</th>
               <th style={TH}>Exp</th>
@@ -165,6 +167,7 @@ export default function LocalDatabasePage() {
                 <td style={{ ...TD, color: '#d1d5db' }}>{(page - 1) * LIMIT + i + 1}</td>
                 <td style={{ ...TD, fontWeight: 600, color: '#111827' }}>{c.fullName}</td>
                 <td style={TD}>{c.phone}</td>
+                <td style={{ ...TD, color: '#6b7280' }}>{c.email || '—'}</td>
                 <td style={TD}>{c.currentCompany || '—'}</td>
                 <td style={TD}>{c.currentDesignation || '—'}</td>
                 <td style={TD}>{c.totalExp ?? '—'}</td>
@@ -176,7 +179,7 @@ export default function LocalDatabasePage() {
             ))}
             {!loading && !candidates.length && (
               <tr>
-                <td colSpan={10} style={{ textAlign: 'center', padding: '32px 16px', fontSize: 14, color: '#9ca3af' }}>
+                <td colSpan={11} style={{ textAlign: 'center', padding: '32px 16px', fontSize: 14, color: '#9ca3af' }}>
                   {query ? 'No results found.' : 'No candidates yet.'}
                 </td>
               </tr>

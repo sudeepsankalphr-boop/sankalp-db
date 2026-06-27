@@ -144,6 +144,7 @@ router.get('/export', protect, async (req, res) => {
         'SI No':         i + 1,
         'Name':          c.fullName,
         'Phone':         c.phone,
+        'Email':         c.email || '',
         'Company':       c.currentCompany || '',
         'Designation':   c.currentDesignation || '',
         'Location':      c.location?.name || '',

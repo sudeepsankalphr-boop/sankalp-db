@@ -175,71 +175,91 @@ export default function Candidates() {
       </div>
 
       <div style={{ overflowX: 'auto' }}>
-      <table className="w-full border-collapse text-sm" style={{ minWidth: 900 }}>
+      <table className="border-collapse text-sm" style={{ width: '100%', tableLayout: 'fixed', minWidth: 1580 }}>
+        <colgroup>
+          <col style={{ width: 40 }} />
+          <col style={{ width: 145 }} />
+          <col style={{ width: 115 }} />
+          <col style={{ width: 160 }} />
+          <col style={{ width: 125 }} />
+          <col style={{ width: 130 }} />
+          <col style={{ width: 95 }} />
+          <col style={{ width: 48 }} />
+          <col style={{ width: 72 }} />
+          <col style={{ width: 72 }} />
+          <col style={{ width: 88 }} />
+          <col style={{ width: 100 }} />
+          <col style={{ width: 190 }} />
+          <col style={{ width: 88 }} />
+          <col style={{ width: 58 }} />
+          <col style={{ width: 120 }} />
+        </colgroup>
         <thead>
           <tr className="bg-gray-100 text-left">
-            <th className="border-b px-3 py-2 text-gray-400 font-normal">#</th>
-            <th className="border-b px-3 py-2">Name</th>
-            <th className="border-b px-3 py-2">Phone</th>
-            <th className="border-b px-3 py-2">Company</th>
-            <th className="border-b px-3 py-2">Designation</th>
-            <th className="border-b px-3 py-2">Location</th>
-            <th className="border-b px-3 py-2">Exp</th>
-            <th className="border-b px-3 py-2">Cur CTC</th>
-            <th className="border-b px-3 py-2">Exp CTC</th>
-            <th className="border-b px-3 py-2">Notice</th>
-            <th className="border-b px-3 py-2">Status</th>
-            <th className="border-b px-3 py-2">Remarks</th>
-            <th className="border-b px-3 py-2">Added On</th>
-            <th className="border-b px-3 py-2">CV</th>
-            <th className="border-b px-3 py-2">Actions</th>
+            <th className="border-b px-2 py-2 text-gray-400 font-normal text-xs">#</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold">Name</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold">Phone</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold">Email</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold">Company</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold">Designation</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold">Location</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold">Exp</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold">Cur CTC</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold">Exp CTC</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold">Notice</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold">Status</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold">Remarks</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold">Added On</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold text-center">CV</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
           {data.candidates.map((c, i) => (
             <tr key={c._id} className="hover:bg-gray-50">
-              <td className="border-b px-3 py-2 text-gray-400 text-xs">{(page - 1) * 20 + i + 1}</td>
-              <td className="border-b px-3 py-2 font-medium whitespace-nowrap">{c.fullName}</td>
-              <td className="border-b px-3 py-2 whitespace-nowrap">{c.phone}</td>
-              <td className="border-b px-3 py-2">{c.currentCompany || '—'}</td>
-              <td className="border-b px-3 py-2">{c.currentDesignation || '—'}</td>
-              <td className="border-b px-3 py-2 whitespace-nowrap">{c.location?.name || '—'}</td>
-              <td className="border-b px-3 py-2">{c.totalExp ?? '—'}</td>
-              <td className="border-b px-3 py-2">{fmtCTC(c.currentCTC)}</td>
-              <td className="border-b px-3 py-2">{fmtCTC(c.expectedCTC)}</td>
-              <td className="border-b px-3 py-2 whitespace-nowrap">{c.noticePeriod || '—'}</td>
-              <td className="border-b px-3 py-2">
+              <td className="border-b px-2 py-2 text-gray-400 text-xs" style={{ verticalAlign: 'middle' }}>{(page - 1) * 20 + i + 1}</td>
+              <td className="border-b px-2 py-2 font-medium" style={{ verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.fullName}</td>
+              <td className="border-b px-2 py-2" style={{ verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{c.phone}</td>
+              <td className="border-b px-2 py-2 text-xs text-gray-500" style={{ verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.email || '—'}</td>
+              <td className="border-b px-2 py-2" style={{ verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.currentCompany || '—'}</td>
+              <td className="border-b px-2 py-2" style={{ verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.currentDesignation || '—'}</td>
+              <td className="border-b px-2 py-2" style={{ verticalAlign: 'middle', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.location?.name || '—'}</td>
+              <td className="border-b px-2 py-2" style={{ verticalAlign: 'middle' }}>{c.totalExp ?? '—'}</td>
+              <td className="border-b px-2 py-2" style={{ verticalAlign: 'middle' }}>{fmtCTC(c.currentCTC)}</td>
+              <td className="border-b px-2 py-2" style={{ verticalAlign: 'middle' }}>{fmtCTC(c.expectedCTC)}</td>
+              <td className="border-b px-2 py-2 text-xs" style={{ verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{c.noticePeriod || '—'}</td>
+              <td className="border-b px-2 py-2" style={{ verticalAlign: 'middle' }}>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 whitespace-nowrap">{c.status}</span>
               </td>
-              <td className="border-b px-3 py-2" style={{ maxWidth: 160 }}>
+              <td className="border-b px-2 py-2" style={{ verticalAlign: 'middle' }}>
                 <span className="text-xs text-gray-600 line-clamp-2">{c.remarks || '—'}</span>
               </td>
-              <td className="border-b px-3 py-2 whitespace-nowrap text-xs text-gray-500">{fmtDate(c.editableDate || c.createdAt)}</td>
-              <td className="border-b px-3 py-2">
+              <td className="border-b px-2 py-2 text-xs text-gray-500" style={{ verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{fmtDate(c.editableDate || c.createdAt)}</td>
+              <td className="border-b px-2 py-2 text-center" style={{ verticalAlign: 'middle' }}>
                 {c.cvUrl ? (
                   <CvCell candidate={c} onPreview={() => setCvPreview(c)} />
-                ) : '—'}
+                ) : <span className="text-gray-300 text-xs">—</span>}
               </td>
-              <td className="border-b px-3 py-2">
-                <div className="flex gap-2">
+              <td className="border-b px-2 py-2 text-right" style={{ verticalAlign: 'middle' }}>
+                <div className="flex gap-1 justify-end">
                   <Link
                     to={`/clients/${clientId}/roles/${roleId}/candidates/${c._id}/edit`}
-                    className="px-3 py-1.5 rounded text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100"
+                    className="px-2 py-1 rounded text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100"
                   >
                     Edit
                   </Link>
                   <button
                     onClick={() => setDeleteTarget(c)}
-                    className="px-3 py-1.5 rounded text-sm font-medium bg-red-50 text-red-700 hover:bg-red-100"
+                    className="px-2 py-1 rounded text-xs font-medium bg-red-50 text-red-700 hover:bg-red-100"
                   >
-                    Delete
+                    Del
                   </button>
                 </div>
               </td>
             </tr>
           ))}
           {!data.candidates.length && (
-            <tr><td colSpan={15} className="text-center py-8 text-gray-400">No candidates found</td></tr>
+            <tr><td colSpan={16} className="text-center py-8 text-gray-400">No candidates found</td></tr>
           )}
         </tbody>
       </table>
