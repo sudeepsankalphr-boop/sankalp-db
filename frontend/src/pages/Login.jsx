@@ -1,22 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { user, login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (user) {
+      navigate(user.role === 'admin' ? '/admin/clients' : '/clients', { replace: true });
+    }
+  }, [user]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const user = await login(email, password);
-      navigate(user.role === 'admin' ? '/admin/clients' : '/clients');
+      await login(email, password);
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     } finally {
