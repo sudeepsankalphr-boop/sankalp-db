@@ -184,28 +184,34 @@ router.post('/', protect, upload.single('cv'), async (req, res) => {
     if (req.file) {
       const originalKB = (req.file.size / 1024).toFixed(1);
       if (req.file.mimetype === 'application/pdf') {
+        console.log('[POST /candidates] before pdfToJpg', { originalKB, filename: req.file.originalname });
         const pageBuffers = await pdfToJpg(req.file.buffer);
+        console.log('[POST /candidates] after pdfToJpg', { pages: pageBuffers.length, total_KB: (pageBuffers.reduce((s, b) => s + b.length, 0) / 1024).toFixed(1) });
         const ts = Date.now();
+        console.log('[POST /candidates] before cloudinary upload', { pages: pageBuffers.length });
         const uploads = await Promise.all(
           pageBuffers.map((buf, i) => uploadBuffer(buf, { public_id: `cv_${ts}_p${i}`, format: 'jpg' }))
         );
-        console.log('[CV upload]', {
+        console.log('[POST /candidates] after cloudinary upload', {
           original_KB: originalKB,
           pages: uploads.length,
           total_KB: (pageBuffers.reduce((s, b) => s + b.length, 0) / 1024).toFixed(1),
+          urls: uploads.map((u) => u.secure_url),
         });
         data.cvUrl = uploads[0].secure_url;
         data.cvPublicId = uploads[0].public_id;
         data.cvPages = uploads.map((u) => u.secure_url);
       } else {
+        console.log('[POST /candidates] before cloudinary upload (non-pdf)', { originalKB, filename: req.file.originalname, mimetype: req.file.mimetype });
         const result = await uploadBuffer(req.file.buffer, {
           public_id: `cv_${Date.now()}`,
           format: req.file.originalname.split('.').pop().toLowerCase(),
         });
-        console.log('[CV upload]', {
+        console.log('[POST /candidates] after cloudinary upload (non-pdf)', {
           original_KB: originalKB,
           cloudinary_KB: (result.bytes / 1024).toFixed(1),
           format: result.format,
+          url: result.secure_url,
         });
         data.cvUrl = result.secure_url;
         data.cvPublicId = result.public_id;
@@ -216,6 +222,7 @@ router.post('/', protect, upload.single('cv'), async (req, res) => {
     const candidate = await Candidate.create(data);
     res.status(201).json(candidate);
   } catch (err) {
+    console.error('[POST /candidates] error', { message: err.message, code: err.code, stack: err.stack });
     if (err.code === 11000) return res.status(409).json({ message: 'Candidate with this number already exists in this role' });
     res.status(400).json({ message: err.message });
   }
