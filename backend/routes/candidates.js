@@ -105,7 +105,7 @@ router.get('/bulk-download', protect, async (req, res) => {
     const filter = { cvUrl: { $ne: null, $ne: '' } };
     if (roleId) filter.role = roleId;
 
-    const candidates = await Candidate.find(filter).populate('role', 'title').select('fullName cvUrl role');
+    const candidates = await Candidate.find(filter).populate('role', 'title').select('fullName cvUrl cvPages role');
     if (!candidates.length) return res.status(404).json({ message: 'No CVs found' });
 
     const roleName = candidates[0]?.role?.title || 'candidates';
@@ -116,13 +116,17 @@ router.get('/bulk-download', protect, async (req, res) => {
     archive.pipe(res);
 
     for (const c of candidates) {
-      try {
-        const response = await axios.get(c.cvUrl, { responseType: 'arraybuffer', timeout: 15000 });
-        const ext = c.cvUrl.split('.').pop().split('?')[0] || 'pdf';
-        const safeName = c.fullName.replace(/[^a-z0-9_\-]/gi, '_');
-        archive.append(Buffer.from(response.data), { name: `${safeName}.${ext}` });
-      } catch (e) {
-        // skip failed downloads silently
+      const safeName = c.fullName.replace(/[^a-z0-9_\-]/gi, '_');
+      const pages = c.cvPages?.length ? c.cvPages : (c.cvUrl ? [c.cvUrl] : []);
+      for (let i = 0; i < pages.length; i++) {
+        try {
+          const response = await axios.get(pages[i], { responseType: 'arraybuffer', timeout: 15000 });
+          const ext = pages[i].split('.').pop().split('?')[0] || 'jpg';
+          const filename = pages.length === 1 ? `${safeName}.${ext}` : `${safeName}_p${i + 1}.${ext}`;
+          archive.append(Buffer.from(response.data), { name: filename });
+        } catch (e) {
+          // skip failed downloads silently
+        }
       }
     }
 
