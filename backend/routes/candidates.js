@@ -7,6 +7,7 @@ const Candidate = require('../models/Candidate');
 const Client = require('../models/Client');
 const Role = require('../models/Role');
 const { protect } = require('../middleware/auth');
+const { PDFDocument } = require('pdf-lib');
 const { uploadBuffer, deleteFile } = require('../utils/cloudinary');
 const pdfToJpg = require('../utils/pdfToJpg');
 
@@ -117,16 +118,28 @@ router.get('/bulk-download', protect, async (req, res) => {
 
     for (const c of candidates) {
       const safeName = c.fullName.replace(/[^a-z0-9_\-]/gi, '_');
-      const pages = c.cvPages?.length ? c.cvPages : (c.cvUrl ? [c.cvUrl] : []);
-      for (let i = 0; i < pages.length; i++) {
-        try {
-          const response = await axios.get(pages[i], { responseType: 'arraybuffer', timeout: 15000 });
-          const ext = pages[i].split('.').pop().split('?')[0] || 'jpg';
-          const filename = pages.length === 1 ? `${safeName}.${ext}` : `${safeName}_p${i + 1}.${ext}`;
-          archive.append(Buffer.from(response.data), { name: filename });
-        } catch (e) {
-          // skip failed downloads silently
+      try {
+        if (c.cvPages?.length) {
+          const pdfDoc = await PDFDocument.create();
+          for (const pageUrl of c.cvPages) {
+            try {
+              const response = await axios.get(pageUrl, { responseType: 'arraybuffer', timeout: 15000 });
+              const jpgImage = await pdfDoc.embedJpg(Buffer.from(response.data));
+              const page = pdfDoc.addPage([jpgImage.width, jpgImage.height]);
+              page.drawImage(jpgImage, { x: 0, y: 0, width: jpgImage.width, height: jpgImage.height });
+            } catch (e) {
+              // skip failed page silently
+            }
+          }
+          const pdfBytes = await pdfDoc.save();
+          archive.append(Buffer.from(pdfBytes), { name: `${safeName}.pdf` });
+        } else if (c.cvUrl) {
+          const response = await axios.get(c.cvUrl, { responseType: 'arraybuffer', timeout: 15000 });
+          const ext = c.cvUrl.split('.').pop().split('?')[0] || 'pdf';
+          archive.append(Buffer.from(response.data), { name: `${safeName}.${ext}` });
         }
+      } catch (e) {
+        // skip failed candidates silently
       }
     }
 
