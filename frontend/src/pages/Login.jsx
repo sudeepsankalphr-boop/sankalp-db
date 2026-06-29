@@ -38,12 +38,8 @@ export default function Login() {
         {/* Left panel */}
         <div style={{ flex: 1, background: 'linear-gradient(145deg, #eef4ff 0%, #dce8f8 100%)', padding: '48px 40px', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 36 }}>
-            <img src={logo} alt="Sankalp HR Services" style={{ width: 64, height: 64, objectFit: 'contain', borderRadius: 8 }} />
-            <div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: '#1e3a5f', lineHeight: 1.1 }}>Sankalp</div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: '#7ab648', lineHeight: 1.2 }}>HR Services</div>
-            </div>
+          <div style={{ marginBottom: 28 }}>
+            <img src={logo} alt="Sankalp HR Services" style={{ width: 160, height: 160, objectFit: 'contain', mixBlendMode: 'multiply' }} />
           </div>
 
           {/* Headline */}
