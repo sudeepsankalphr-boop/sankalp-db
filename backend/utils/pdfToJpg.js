@@ -14,6 +14,8 @@ const SETTINGS = {
   multi:  { dpi: 110, quality: 65, maxBytes: 600 * 1024 },
 };
 
+const FALLBACK_QUALITIES = [50, 40, 30];
+
 module.exports = async function pdfToJpg(pdfBuffer) {
   let pageCount = 1;
   try {
@@ -32,25 +34,28 @@ module.exports = async function pdfToJpg(pdfBuffer) {
 
   try {
     fs.writeFileSync(inputPath, pdfBuffer);
-    await execFileAsync('pdftoppm', [
-      '-jpeg', '-r', String(s.dpi), '-jpegopt', `quality=${s.quality}`,
-      inputPath, outputPrefix,
-    ]);
 
-    const jpgFiles = fs.readdirSync(tmpDir)
-      .filter((f) => f.endsWith('.jpg'))
-      .sort();
-    if (!jpgFiles.length) throw new Error('pdftoppm produced no output');
+    for (const quality of [s.quality, ...FALLBACK_QUALITIES]) {
+      await execFileAsync('pdftoppm', [
+        '-jpeg', '-r', String(s.dpi), '-jpegopt', `quality=${quality}`,
+        inputPath, outputPrefix,
+      ]);
 
-    const buffers = jpgFiles.map((f) => fs.readFileSync(path.join(tmpDir, f)));
-    const totalBytes = buffers.reduce((sum, b) => sum + b.length, 0);
-    if (totalBytes > s.maxBytes) {
-      throw new Error(
-        `CV images too large after conversion: ${(totalBytes / 1024).toFixed(0)}KB ` +
-        `(limit ${s.maxBytes / 1024}KB for ${label}-page PDF)`
-      );
+      const jpgFiles = fs.readdirSync(tmpDir)
+        .filter((f) => f.endsWith('.jpg'))
+        .sort();
+      if (!jpgFiles.length) throw new Error('pdftoppm produced no output');
+
+      const buffers = jpgFiles.map((f) => fs.readFileSync(path.join(tmpDir, f)));
+      const totalBytes = buffers.reduce((sum, b) => sum + b.length, 0);
+
+      if (totalBytes <= s.maxBytes) return buffers;
     }
-    return buffers;
+
+    throw new Error(
+      `CV images too large after conversion even at quality 30 ` +
+      `(limit ${s.maxBytes / 1024}KB for ${label}-page PDF)`
+    );
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }

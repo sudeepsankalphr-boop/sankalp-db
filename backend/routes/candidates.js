@@ -202,6 +202,9 @@ router.post('/', protect, upload.single('cv'), async (req, res) => {
         data.cvPublicId = uploads[0].public_id;
         data.cvPages = uploads.map((u) => u.secure_url);
       } else {
+        if (req.file.size > 1024 * 1024) {
+          return res.status(400).json({ message: 'CV file too large. Maximum size is 1MB for non-PDF files.' });
+        }
         console.log('[POST /candidates] before cloudinary upload (non-pdf)', { originalKB, filename: req.file.originalname, mimetype: req.file.mimetype });
         const result = await uploadBuffer(req.file.buffer, {
           public_id: `cv_${Date.now()}`,
