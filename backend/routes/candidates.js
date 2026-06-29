@@ -62,7 +62,8 @@ router.get('/export', protect, async (req, res) => {
     const candidates = await Candidate.find(filter)
       .populate('role', 'title')
       .populate('client', 'name')
-      .populate('location', 'name');
+      .populate('location', 'name')
+      .populate('addedBy', 'name');
 
     const rows = candidates.map((c) => ({
       Name: c.fullName,
@@ -84,6 +85,7 @@ router.get('/export', protect, async (req, res) => {
       Location: c.location?.name || '',
       'CV URL': c.cvUrl || '',
       'Added On': c.createdAt ? c.createdAt.toISOString().split('T')[0] : '',
+      Consultant: c.addedBy?.name || '',
     }));
 
     const ws = XLSX.utils.json_to_sheet(rows);
