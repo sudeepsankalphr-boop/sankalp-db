@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { useToast } from '../components/Toast';
 
 const COLS = [
   { key: 'role',            label: 'Role',           width: 160 },
@@ -41,6 +42,7 @@ const TD = {
 
 export default function ReportsPage() {
   const navigate = useNavigate();
+  const showToast = useToast();
   const [clients, setClients] = useState([]);
   const [clientId, setClientId] = useState('');
   const [from, setFrom] = useState('');
@@ -71,8 +73,21 @@ export default function ReportsPage() {
     }
   };
 
-  const downloadExcel = () => {
-    window.open(`/api/reports/export?clientId=${clientId}&from=${from}&to=${to}`, '_blank');
+  const handleGenerateExcel = async () => {
+    try {
+      const params = new URLSearchParams({ clientId, from, to });
+      const res = await api.get(`/reports/excel?${params}`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'report.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      showToast('Export failed', 'error');
+    }
   };
 
   // Totals row
@@ -136,7 +151,7 @@ export default function ReportsPage() {
 
         {report && (
           <button
-            onClick={downloadExcel}
+            onClick={handleGenerateExcel}
             style={{ padding: '9px 20px', fontSize: 14, fontWeight: 600, background: '#16a34a', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', marginLeft: 'auto' }}
           >
             Generate Excel
