@@ -76,7 +76,7 @@ export default function ReportsPage() {
   const handleGenerateExcel = async () => {
     try {
       const params = new URLSearchParams({ clientId, from, to });
-      const res = await api.get(`/reports/excel?${params}`, { responseType: 'blob' });
+      const res = await api.get(`/reports/export?${params}`, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const a = document.createElement('a');
       a.href = url;
