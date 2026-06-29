@@ -110,13 +110,37 @@ export default function Candidates() {
     setDeleteTarget(null);
   };
 
-  const handleExport = () => {
-    const params = new URLSearchParams({ roleId, clientId });
-    window.open(`/api/candidates/export?${params}`, '_blank');
+  const handleExport = async () => {
+    try {
+      const params = new URLSearchParams({ roleId, clientId });
+      const res = await api.get(`/candidates/export?${params}`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'candidates.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      showToast('Export failed', 'error');
+    }
   };
 
-  const handleBulkDownload = () => {
-    window.open(`/api/candidates/bulk-download?roleId=${roleId}`, '_blank');
+  const handleBulkDownload = async () => {
+    try {
+      const res = await api.get(`/candidates/bulk-download?roleId=${roleId}`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'cvs.zip';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      showToast('Bulk download failed', 'error');
+    }
   };
 
   const handleImport = async (e) => {
@@ -175,7 +199,7 @@ export default function Candidates() {
       </div>
 
       <div style={{ overflowX: 'auto' }}>
-      <table className="border-collapse text-sm" style={{ width: '100%', tableLayout: 'fixed', minWidth: 1580 }}>
+      <table className="border-collapse text-sm" style={{ width: '100%', tableLayout: 'fixed', minWidth: 1680 }}>
         <colgroup>
           <col style={{ width: 40 }} />
           <col style={{ width: 145 }} />
@@ -191,6 +215,7 @@ export default function Candidates() {
           <col style={{ width: 100 }} />
           <col style={{ width: 190 }} />
           <col style={{ width: 88 }} />
+          <col style={{ width: 100 }} />
           <col style={{ width: 58 }} />
           <col style={{ width: 120 }} />
         </colgroup>
@@ -210,6 +235,7 @@ export default function Candidates() {
             <th className="border-b px-2 py-2 text-xs font-semibold">Status</th>
             <th className="border-b px-2 py-2 text-xs font-semibold">Remarks</th>
             <th className="border-b px-2 py-2 text-xs font-semibold">Added On</th>
+            <th className="border-b px-2 py-2 text-xs font-semibold">Consultant</th>
             <th className="border-b px-2 py-2 text-xs font-semibold text-center">CV</th>
             <th className="border-b px-2 py-2 text-xs font-semibold text-right">Actions</th>
           </tr>
@@ -235,6 +261,7 @@ export default function Candidates() {
                 <span className="text-xs text-gray-600 line-clamp-2">{c.remarks || '—'}</span>
               </td>
               <td className="border-b px-2 py-2 text-xs text-gray-500" style={{ verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{fmtDate(c.editableDate || c.createdAt)}</td>
+              <td className="border-b px-2 py-2 text-xs text-gray-500" style={{ verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.addedBy?.name || '—'}</td>
               <td className="border-b px-2 py-2 text-center" style={{ verticalAlign: 'middle' }}>
                 {c.cvUrl ? (
                   <CvCell candidate={c} onPreview={() => setCvPreview(c)} />
@@ -259,7 +286,7 @@ export default function Candidates() {
             </tr>
           ))}
           {!data.candidates.length && (
-            <tr><td colSpan={16} className="text-center py-8 text-gray-400">No candidates found</td></tr>
+            <tr><td colSpan={17} className="text-center py-8 text-gray-400">No candidates found</td></tr>
           )}
         </tbody>
       </table>
