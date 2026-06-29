@@ -28,6 +28,7 @@ const candidateSchema = new mongoose.Schema(
     remarks: { type: String },
     cvUrl: { type: String },
     cvPublicId: { type: String },
+    cvPages: [{ type: String }],
     role: { type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true },
     client: { type: mongoose.Schema.Types.ObjectId, ref: 'Client', required: true },
     location: { type: mongoose.Schema.Types.ObjectId, ref: 'Location' },

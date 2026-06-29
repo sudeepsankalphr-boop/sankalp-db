@@ -11,7 +11,6 @@ export default function AdminRoles() {
   const showToast = useToast();
   const [roles, setRoles] = useState([]);
   const [clients, setClients] = useState([]);
-  const [locations, setLocations] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -20,14 +19,12 @@ export default function AdminRoles() {
 
   const fetchAll = async () => {
     try {
-      const [rolesRes, clientsRes, locsRes] = await Promise.all([
+      const [rolesRes, clientsRes] = await Promise.all([
         api.get(clientFilter ? `/roles?clientId=${clientFilter}` : '/roles'),
         api.get('/clients'),
-        api.get('/locations'),
       ]);
       setRoles(rolesRes.data);
       setClients(clientsRes.data);
-      setLocations(locsRes.data);
     } catch { showToast('Failed to load data', 'error'); }
   };
 
@@ -36,7 +33,7 @@ export default function AdminRoles() {
   const openAdd = () => { setEditing(null); reset({ status: 'open', openings: 1 }); setModalOpen(true); };
   const openEdit = (r) => {
     setEditing(r);
-    reset({ title: r.title, client: r.client?._id || '', location: r.location?._id || '', openings: r.openings, status: r.status, jd: r.jd || '' });
+    reset({ title: r.title, client: r.client?._id || '', openings: r.openings, status: r.status, jd: r.jd || '' });
     setModalOpen(true);
   };
 
@@ -82,7 +79,6 @@ export default function AdminRoles() {
           <tr className="bg-gray-100 text-left">
             <th className="border-b px-3 py-2">Title</th>
             <th className="border-b px-3 py-2">Client</th>
-            <th className="border-b px-3 py-2">Location</th>
             <th className="border-b px-3 py-2">Openings</th>
             <th className="border-b px-3 py-2">Status</th>
             <th className="border-b px-3 py-2">Actions</th>
@@ -93,7 +89,6 @@ export default function AdminRoles() {
             <tr key={r._id} className="hover:bg-gray-50">
               <td className="border-b px-3 py-2">{r.title}</td>
               <td className="border-b px-3 py-2">{r.client?.name || '—'}</td>
-              <td className="border-b px-3 py-2">{r.location?.name || '—'}</td>
               <td className="border-b px-3 py-2">{r.openings}</td>
               <td className="border-b px-3 py-2">
                 <span className={`text-xs px-2 py-0.5 rounded-full ${r.status === 'open' ? 'bg-green-100 text-green-700' : r.status === 'closed' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>{r.status}</span>
@@ -106,7 +101,7 @@ export default function AdminRoles() {
               </td>
             </tr>
           ))}
-          {!roles.length && <tr><td colSpan={6} className="text-center py-8 text-gray-400">No roles found</td></tr>}
+          {!roles.length && <tr><td colSpan={5} className="text-center py-8 text-gray-400">No roles found</td></tr>}
         </tbody>
       </table>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit Role' : 'Add Role'} wide>
@@ -115,20 +110,12 @@ export default function AdminRoles() {
             <input {...register('title', { required: 'Required' })} className={inputCls} />
             {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><label className="block text-sm font-medium text-gray-700 mb-1">Client *</label>
-              <select {...register('client', { required: 'Required' })} className={inputCls}>
-                <option value="">Select client</option>
-                {clients.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
-              </select>
-              {errors.client && <p className="text-red-500 text-xs mt-1">{errors.client.message}</p>}
-            </div>
-            <div><label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-              <select {...register('location')} className={inputCls}>
-                <option value="">Select location</option>
-                {locations.map((l) => <option key={l._id} value={l._id}>{l.name}</option>)}
-              </select>
-            </div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">Client *</label>
+            <select {...register('client', { required: 'Required' })} className={inputCls}>
+              <option value="">Select client</option>
+              {clients.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
+            </select>
+            {errors.client && <p className="text-red-500 text-xs mt-1">{errors.client.message}</p>}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div><label className="block text-sm font-medium text-gray-700 mb-1">Openings</label><input type="number" min="1" {...register('openings')} className={inputCls} /></div>

@@ -182,25 +182,35 @@ router.post('/', protect, upload.single('cv'), async (req, res) => {
     }
 
     if (req.file) {
-      let buffer = req.file.buffer;
-      let uploadFormat = req.file.originalname.split('.').pop().toLowerCase();
+      const originalKB = (req.file.size / 1024).toFixed(1);
       if (req.file.mimetype === 'application/pdf') {
-        buffer = await pdfToJpg(buffer);
-        uploadFormat = 'jpg';
+        const pageBuffers = await pdfToJpg(req.file.buffer);
+        const ts = Date.now();
+        const uploads = await Promise.all(
+          pageBuffers.map((buf, i) => uploadBuffer(buf, { public_id: `cv_${ts}_p${i}`, format: 'jpg' }))
+        );
+        console.log('[CV upload]', {
+          original_KB: originalKB,
+          pages: uploads.length,
+          total_KB: (pageBuffers.reduce((s, b) => s + b.length, 0) / 1024).toFixed(1),
+        });
+        data.cvUrl = uploads[0].secure_url;
+        data.cvPublicId = uploads[0].public_id;
+        data.cvPages = uploads.map((u) => u.secure_url);
+      } else {
+        const result = await uploadBuffer(req.file.buffer, {
+          public_id: `cv_${Date.now()}`,
+          format: req.file.originalname.split('.').pop().toLowerCase(),
+        });
+        console.log('[CV upload]', {
+          original_KB: originalKB,
+          cloudinary_KB: (result.bytes / 1024).toFixed(1),
+          format: result.format,
+        });
+        data.cvUrl = result.secure_url;
+        data.cvPublicId = result.public_id;
+        data.cvPages = [];
       }
-      const result = await uploadBuffer(buffer, {
-        public_id: `cv_${Date.now()}`,
-        format: uploadFormat,
-      });
-      console.log('[CV upload] Cloudinary result:', {
-        secure_url: result.secure_url,
-        public_id: result.public_id,
-        resource_type: result.resource_type,
-        format: result.format,
-        bytes: result.bytes,
-      });
-      data.cvUrl = result.secure_url;
-      data.cvPublicId = result.public_id;
     }
 
     const candidate = await Candidate.create(data);
@@ -223,19 +233,47 @@ router.put('/:id', protect, upload.single('cv'), async (req, res) => {
     }
 
     if (req.file) {
-      if (existing.cvPublicId) await deleteFile(existing.cvPublicId);
-      let buffer = req.file.buffer;
-      let uploadFormat = req.file.originalname.split('.').pop().toLowerCase();
-      if (req.file.mimetype === 'application/pdf') {
-        buffer = await pdfToJpg(buffer);
-        uploadFormat = 'jpg';
+      if (existing.cvPublicId) {
+        await deleteFile(existing.cvPublicId);
+        // multi-page uploads are named cv_${ts}_p0 … cv_${ts}_pN; delete pages 1+
+        const base = existing.cvPublicId.replace(/_p0$/, '');
+        if (base !== existing.cvPublicId) {
+          const extraCount = (existing.cvPages || []).length - 1;
+          for (let i = 1; i <= extraCount; i++) {
+            try { await deleteFile(`${base}_p${i}`); } catch (_) {}
+          }
+        }
       }
-      const result = await uploadBuffer(buffer, {
-        public_id: `cv_${Date.now()}`,
-        format: uploadFormat,
-      });
-      data.cvUrl = result.secure_url;
-      data.cvPublicId = result.public_id;
+
+      const originalKB = (req.file.size / 1024).toFixed(1);
+      if (req.file.mimetype === 'application/pdf') {
+        const pageBuffers = await pdfToJpg(req.file.buffer);
+        const ts = Date.now();
+        const uploads = await Promise.all(
+          pageBuffers.map((buf, i) => uploadBuffer(buf, { public_id: `cv_${ts}_p${i}`, format: 'jpg' }))
+        );
+        console.log('[CV upload]', {
+          original_KB: originalKB,
+          pages: uploads.length,
+          total_KB: (pageBuffers.reduce((s, b) => s + b.length, 0) / 1024).toFixed(1),
+        });
+        data.cvUrl = uploads[0].secure_url;
+        data.cvPublicId = uploads[0].public_id;
+        data.cvPages = uploads.map((u) => u.secure_url);
+      } else {
+        const result = await uploadBuffer(req.file.buffer, {
+          public_id: `cv_${Date.now()}`,
+          format: req.file.originalname.split('.').pop().toLowerCase(),
+        });
+        console.log('[CV upload]', {
+          original_KB: originalKB,
+          cloudinary_KB: (result.bytes / 1024).toFixed(1),
+          format: result.format,
+        });
+        data.cvUrl = result.secure_url;
+        data.cvPublicId = result.public_id;
+        data.cvPages = [];
+      }
     }
 
     const updated = await Candidate.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: true });

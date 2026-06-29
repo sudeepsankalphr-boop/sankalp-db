@@ -275,13 +275,23 @@ export default function Candidates() {
       />
 
       <Modal open={!!cvPreview} onClose={() => setCvPreview(null)} title={cvPreview?.fullName} wide>
-        {cvPreview?.cvUrl && (
-          <img
-            src={cvPreview.cvUrl}
-            alt={`CV of ${cvPreview.fullName}`}
-            style={{ width: '100%', height: 'auto', borderRadius: '4px' }}
-          />
-        )}
+        {cvPreview?.cvPages?.length > 0
+          ? cvPreview.cvPages.map((url, i) => (
+              <img
+                key={i}
+                src={url}
+                alt={`CV page ${i + 1}`}
+                style={{ width: '100%', height: 'auto', borderRadius: '4px', display: 'block', marginBottom: i < cvPreview.cvPages.length - 1 ? '8px' : 0 }}
+              />
+            ))
+          : cvPreview?.cvUrl && (
+              <img
+                src={cvPreview.cvUrl}
+                alt={`CV of ${cvPreview?.fullName}`}
+                style={{ width: '100%', height: 'auto', borderRadius: '4px' }}
+              />
+            )
+        }
       </Modal>
     </div>
   );
